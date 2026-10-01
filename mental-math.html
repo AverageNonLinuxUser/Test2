@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#8fb4ff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1320" media="(prefers-color-scheme: dark)">
+<meta name="description" content="Fast arithmetic practice: addition, multiplication, division, and blind timed drills.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Mental math</title>
+<style>
+:root{--bg:#e9edf5;--ink:#1c2233;--mute:#6b7488;--glass:rgba(255,255,255,.5);--edge:rgba(255,255,255,.75);--chip:rgba(255,255,255,.55);--on:rgba(255,255,255,.95);--ok:#2e9e6b;--bad:#d1495b;--b1:#8fb4ff;--b2:#c6a5ff;--b3:#9be3d0;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1320;--ink:#e8ecf7;--mute:#8f98b0;--glass:rgba(30,36,58,.5);--edge:rgba(255,255,255,.12);--chip:rgba(255,255,255,.07);--on:rgba(255,255,255,.18);--b1:#3a5fd0;--b2:#6c3fc0;--b3:#1f8f7c}}
+:root[data-theme="dark"]{--bg:#0f1320;--ink:#e8ecf7;--mute:#8f98b0;--glass:rgba(30,36,58,.5);--edge:rgba(255,255,255,.12);--chip:rgba(255,255,255,.07);--on:rgba(255,255,255,.18);--b1:#3a5fd0;--b2:#6c3fc0;--b3:#1f8f7c}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.4 ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",Roboto,sans-serif;display:grid;place-items:center;overflow:hidden}
+.blob{position:fixed;border-radius:50%;filter:blur(70px);opacity:.75;z-index:0}
+.blob:nth-child(1){width:320px;height:320px;background:var(--b1);top:8%;left:12%}
+.blob:nth-child(2){width:280px;height:280px;background:var(--b2);bottom:6%;right:14%}
+.blob:nth-child(3){width:200px;height:200px;background:var(--b3);top:48%;left:52%}
+main{position:relative;z-index:1;width:min(340px,92vw);padding:18px;border-radius:24px;background:var(--glass);border:1px solid var(--edge);backdrop-filter:blur(28px) saturate(170%);-webkit-backdrop-filter:blur(28px) saturate(170%);box-shadow:0 20px 50px rgba(20,30,70,.15);transition:box-shadow .2s}
+main.ok{box-shadow:0 0 0 2px var(--ok),0 20px 50px rgba(20,30,70,.15)}
+main.bad{box-shadow:0 0 0 2px var(--bad),0 20px 50px rgba(20,30,70,.15)}
+.seg{display:flex;gap:2px;padding:3px;border-radius:12px;background:var(--chip)}
+.seg button{flex:1;border:0;background:none;color:var(--mute);font:inherit;font-size:13px;padding:6px 4px;border-radius:9px;cursor:pointer}
+.seg button.on{background:var(--on);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--b1);outline-offset:2px}
+.opts{display:flex;flex-direction:column;gap:8px;margin-top:10px;font-size:12px;color:var(--mute)}
+.row{display:flex;align-items:center;gap:10px}
+.row>span{width:52px;flex:none}
+.row .seg{flex:1}
+input[type=range]{flex:1;accent-color:var(--b1)}
+#blindOpts{display:none;flex-direction:column;gap:8px}
+#blindOpts.show{display:flex}
+#q{height:96px;display:grid;place-items:center;margin-top:12px;font-size:40px;font-weight:300;letter-spacing:.01em;font-variant-numeric:tabular-nums;text-align:center}
+#q.hid{color:var(--mute);letter-spacing:.3em;filter:blur(1.5px)}
+#bar{height:3px;border-radius:2px;background:var(--b1);width:0;opacity:0}
+#bar.run{opacity:1;animation:shrink linear forwards}
+@keyframes shrink{from{width:100%}to{width:0}}
+.ans{display:flex;gap:8px}
+input[type=text]{flex:1;min-width:0;border:1px solid var(--edge);background:var(--chip);color:var(--ink);font:inherit;font-size:22px;text-align:center;padding:10px;border-radius:14px}
+.go{border:0;border-radius:14px;padding:0 16px;background:var(--ink);color:var(--bg);font:inherit;cursor:pointer}
+.stats{display:flex;justify-content:space-between;margin-top:12px;font-size:12px;color:var(--mute);font-variant-numeric:tabular-nums}
+.stats button{border:0;background:none;color:var(--mute);font:inherit;cursor:pointer;padding:0}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blob"></div><div class="blob"></div><div class="blob"></div>
+<main id="card">
+  <div class="seg" id="mode">
+    <button data-v="add" class="on">Add</button><button data-v="mul">Multiply</button><button data-v="div">Divide</button><button data-v="blind">Blind</button>
+  </div>
+  <div class="opts">
+    <div class="row"><span>Digits</span><div class="seg" id="dig"><button data-v="1">1</button><button data-v="2" class="on">2</button><button data-v="3">3</button></div></div>
+    <div id="blindOpts">
+      <div class="row"><span>Operation</span><div class="seg" id="bop"><button data-v="add" class="on">+</button><button data-v="mul">×</button><button data-v="div">÷</button></div></div>
+      <div class="row"><span>Show for</span><input type="range" id="tm" min="0.5" max="5" step="0.5" value="2"><b id="tmv" style="width:32px;text-align:right;color:var(--ink);font-weight:500">2s</b></div>
+    </div>
+  </div>
+  <div id="q"></div>
+  <div id="bar"></div>
+  <div class="ans" style="margin-top:10px">
+    <input type="text" id="in" inputmode="numeric" autocomplete="off" autofocus aria-label="Answer" placeholder="Answer">
+    <button class="go" id="go">Check</button>
+  </div>
+  <div class="stats"><span id="s1">0 / 0</span><span id="s2">Streak 0</span><span id="s3">Avg –</span><button id="reset">Reset</button></div>
+</main>
+<script>
+const $=s=>document.querySelector(s),R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const SYM={add:'+',mul:'×',div:'÷'};
+const S={mode:'add',d:2,bop:'add',t:2,ok:0,n:0,streak:0,ms:[],q:null,t0:0,busy:false,tm:null};
+function seg(id,fn){$(id).addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+ [...$(id).children].forEach(c=>c.classList.toggle('on',c===b));fn(b.dataset.v);});}
+function gen(op){const d=S.d,lo=d===1?2:10**(d-1),hi=10**d-1;
+ if(op==='add'){const a=R(lo,hi),b=R(lo,hi);return{a,b,op,ans:a+b}}
+ if(op==='mul'){const a=R(lo,hi),b=R(lo,hi);return{a,b,op,ans:a*b}}
+ const b=R(lo,hi),q=R(lo,hi);return{a:b*q,b,op,ans:q}}
+function next(){clearTimeout(S.tm);S.busy=false;$('#card').className='';
+ const op=S.mode==='blind'?S.bop:S.mode;S.q=gen(op);
+ const q=$('#q'),bar=$('#bar');q.className='';q.textContent=`${S.q.a} ${SYM[op]} ${S.q.b}`;
+ bar.className='';$('#in').value='';$('#in').focus();
+ if(S.mode==='blind'){void bar.offsetWidth;bar.style.animationDuration=S.t+'s';bar.className='run';
+  S.tm=setTimeout(()=>{q.textContent='? ? ?';q.className='hid';bar.className='';S.t0=performance.now()},S.t*1000);}
+ else S.t0=performance.now();}
+function submit(){if(S.busy)return;const v=$('#in').value.trim();if(v==='')return;
+ clearTimeout(S.tm);S.busy=true;$('#bar').className='';
+ if(S.t0<=0||$('#q').className!=='hid'&&S.mode==='blind')S.t0=performance.now();
+ const ok=+v===S.q.ans;S.n++;S.ms.push(performance.now()-S.t0);
+ if(ok){S.ok++;S.streak++}else S.streak=0;
+ const q=$('#q');q.className='';q.textContent=`${S.q.a} ${SYM[S.q.op]} ${S.q.b} = ${S.q.ans}`;q.style.fontSize='30px';
+ $('#card').className=ok?'ok':'bad';stats();
+ setTimeout(()=>{q.style.fontSize='';next()},ok?600:1500);}
+function stats(){const avg=S.ms.length?(S.ms.reduce((a,b)=>a+b)/S.ms.length/1000).toFixed(1)+'s':'–';
+ $('#s1').textContent=`${S.ok} / ${S.n}`;$('#s2').textContent=`Streak ${S.streak}`;$('#s3').textContent=`Avg ${avg}`;}
+seg('#mode',v=>{S.mode=v;$('#blindOpts').classList.toggle('show',v==='blind');next()});
+seg('#dig',v=>{S.d=+v;next()});
+seg('#bop',v=>{S.bop=v;next()});
+$('#tm').oninput=e=>{S.t=+e.target.value;$('#tmv').textContent=S.t+'s'};
+$('#tm').onchange=next;
+$('#in').addEventListener('keydown',e=>{if(e.key==='Enter')submit();if(e.key==='Escape')next()});
+$('#go').onclick=submit;
+$('#reset').onclick=()=>{Object.assign(S,{ok:0,n:0,streak:0,ms:[]});stats();next()};
+next();
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>

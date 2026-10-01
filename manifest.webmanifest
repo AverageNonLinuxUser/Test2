@@ -1,0 +1,33 @@
+{
+  "name": "Mental Math",
+  "short_name": "Mental math",
+  "description": "Fast arithmetic practice: addition, multiplication, division, and blind timed drills.",
+  "id": "./mental-math.html",
+  "start_url": "./mental-math.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#e9edf5",
+  "theme_color": "#8fb4ff",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}
